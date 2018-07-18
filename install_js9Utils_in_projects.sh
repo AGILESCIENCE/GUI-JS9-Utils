@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-declare -a projects=("/var/www/html/spot6/cat2" "/var/www/html/js9TestFolder") #"/var/www/html/scigui/js_dependencies")
+declare -a projects=("/var/www/html/spot6/cat2" "/var/www/html/js9TestFolder" "/var/www/html/scigui/js_dependencies")
 
 js9_dir_to_copy=/var/www/html/js9Utils/.
 

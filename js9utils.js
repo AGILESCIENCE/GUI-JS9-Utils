@@ -85,3 +85,45 @@ function scaleChangeIntervalTrigger(displayId){
 function stopScaleChangeTrigger(){
   window.clearInterval(intervalId);
 }
+
+
+var windowId = 'null';
+
+function loadNewJs9LightWindow(filepath, regionpath = 'null', smoothSigma = 1, scale = 'log', colormap = 'heat') {
+
+
+  if (typeof filepath != "undefined" && filepath) {
+
+    if(windowId !== 'null')
+    {
+      //JS9.CloseDisplay({display: windowId});
+      windowId = 'null';
+    }
+
+    // NEW LIGHT DISPLAY
+    if(windowId === 'null')
+      windowId = JS9.LoadWindow(null, null, "light");
+
+
+
+    JS9.Load(filepath,
+      {
+        onload: function(im){
+
+            JS9.DisplayCoordGrid(true, {display: windowId});
+            //JS9.ResizeDisplay(728, 728,{display: windowId});
+            JS9.SetZoom("toFit");
+
+            // load regions
+            if(regionpath != 'null')
+              JS9.LoadRegions(regionpath, {display: windowId});
+
+            // apply smoothing
+            //if(smoothSigma>0)
+            JS9.GaussBlurData(5, {display: windowId})
+        }
+      }, {display: windowId});
+  }else {
+    console.log("Error! filepath is undefined! filepath -> ",filepath);
+  }
+}
