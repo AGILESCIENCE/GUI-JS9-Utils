@@ -10,3 +10,8 @@ js9utils.js provides high level functions wrapping JS9 API.
 ## Php utilities
 * regionCatalogForJS9Converter.php
 * mergeRegionCatalogs.php
+
+## Add, commit, push
+* git add .
+* git commit -m " " --author="Leonardo Baroncelli <leonardo.baroncelli26@gmail.com>"
+* git push origin master

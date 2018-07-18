@@ -3,7 +3,7 @@
 
 declare -a projects=("/var/www/html/spot6/cat2" "/var/www/html/js9TestFolder" "/var/www/html/scigui/js_dependencies")
 
-js9_dir_to_copy=/var/www/html/js9Utils/.
+js9_dir_to_copy=/opt/prod/js9Utils/sources/.
 
 
 
@@ -29,7 +29,7 @@ then
   for i in "${projects[@]}"
     do
     echo "Installing all js9Utils in project $i"
-    mkdir -p "$i"/js9Utils && cp -R  "$js9_dir_to_copy"  "$i"/js9Utils && rm "$i"/js9Utils/install_js9Utils_in_projects.sh
+    mkdir -p "$i"/js9Utils && mkdir -p "$i"/js9Utils/tmp && cp -R  "$js9_dir_to_copy" "$i"/js9Utils
     installed=1
   done
 fi
@@ -39,7 +39,7 @@ do
   if [ "$1" = "$i" ]
   then
      echo "Installing js9Utils in $1"
-     mkdir -p "$i"/js9Utils && cp -R "$js9_dir_to_copy"  "$1"/js9Utils && rm "$i"/js9Utils/install_js9Utils_in_projects.sh
+     mkdir -p "$i"/js9Utils && mkdir -p "$i"/js9Utils/tmp && cp -R "$js9_dir_to_copy" "$1"/js9Utils
      installed=1
   fi
 done
