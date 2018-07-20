@@ -45,7 +45,7 @@ function loadRegionCatalog(regionFileName, format, wcssys, sourceL, sourceB, deg
 }
 
 
-function mergeRegionCatalogs(catalog1Url, catalog1Format, catalog2Url, catalog2Format, outputFormat, callback) {
+function mergeRegionCatalogs(catalog1Url, catalog1Format, catalog2Url, catalog2Format,/* outputFormat,*/ callback) {
   $.ajax({
     cache: false,
     url:'js9Utils/movePropertyFromRegionCatalogToRegionCatalog.php',
@@ -54,8 +54,8 @@ function mergeRegionCatalogs(catalog1Url, catalog1Format, catalog2Url, catalog2F
       "catalog1Url" : catalog1Url,
       "catalog1Format" : catalog1Format,
       "catalog2Url" : catalog2Url,
-      "catalog2Format" : catalog2Format,
-      "outputFormat" : outputFormat
+      "catalog2Format" : catalog2Format
+    //  "outputFormat" : outputFormat
     },
     contentType: "application/json; charset=utf-8",
     async: true

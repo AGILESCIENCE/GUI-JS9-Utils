@@ -1,16 +1,13 @@
 <?php
 
+include 'regionCatalog.php';
+include 'common.php';
+include 'conf.php';
+
+/**
+Input:
+*/
 /*
-galactic
-ellipse(92.4053,-10.3623,0.274123,0.294406,19.096) #color=green width=2 text={(1)2AGL0249 sqrt(ts)=7.81183 r=0.28}
-galactic
-ellipse(352.523,-8.38252,0.267133,0.342645,36.8129) #color=green width=2 text={(1)2AGL0236 sqrt(ts)=9.9049 r=0.3}
-galactic
-ellipse(348.897,13.4383,0.402999,0.350166,19.0827) #color=green width=2 text={(7)2AGL0211 sqrt(ts)=5.48269 r=0.38}
-galactic
-ellipse(357.38,-2.00809,0.670685,0.386526,10.6102) #color=green width=2 text={(9)B10285I00 sqrt(ts)=6.92482 r=0.51}
-
-
 global color=red
 fk5;point(   0.0377, 65.7517)# point=cross text={3FGL J0000.1+6545}
 fk5;point(   0.0612,-37.6484)# point=cross text={3FGL J0000.2-3738}
@@ -21,39 +18,183 @@ global color=yellow
 fk5;ellipse(   0.0377, 65.7517,  0.1019,  0.0780,131.0300)
 fk5;ellipse(   0.0612,-37.6484,  0.0731,  0.0676,  1.4500)
 fk5;ellipse(   0.2535, 63.2440,  0.2475,  0.1598, 24.6800)
-
 */
 
-//propertyName,fromCatalogUrl,toCatalogUrl
+/**
+Output:
+*/
+/*
+global
+fk5:point(0.0377, 65.7517) # point=cross color=yellow
+fk5:ellipse(0.0377, 65.7517,0.1019,0.0780,131.0300) # color=red text={3FGL J0000.1+6545}
+*/
 
 if (defined('STDIN')) {
-  $catalog1Url = $argv[1];
-  $catalog1Format = $argv[2];
-  $catalog2Url = $argv[3];
-  $catalog2Format = $argv[4];
-  $outputFormat = $argv[5];
+  $fermiCatalog1NameWithTextProperty = $argv[1];
+  $fermiCatalog2Name = $argv[2];
 } else {
-  $catalog1Url = $_GET['catalog1Url'];
-  $catalog1Format = $_GET['catalog1Format'];;
-  $catalog2Url = $_GET['catalog2Url'];
-  $catalog2Format = $_GET['catalog1Format'];
-  $outputFormat = $_GET['outputFormat'];
+  $fermiCatalog1NameWithTextProperty = $_GET['fermiCatalog1NameWithTextProperty'];
+  $fermiCatalog2Name = $_GET['fermiCatalog2Name'];
+}
+
+$catalog1 = new FermiRegionCatalog($fermiCatalog1NameWithTextProperty,"");
+$catalog2 = new FermiRegionCatalog($fermiCatalog2Name,"");
+
+
+
+/**
+  Move region catalaog1 global property like 'global color=red' after each hashtag
+  like 'fk5;point( 330.6872, 42.2835)# point=cross text={3FGL J2202.7+4217} color=red'
+*/
+$catalog1->catalogContent = split("\n",$catalog1->catalogContent);
+foreach ($catalog1->catalogContent as $key => $row)
+{
+  if ($key==0)
+    $catalog1->catalogContent[$key] = "global";
+  else if(!empty($row))
+    $catalog1->catalogContent[$key] = $row." color=red";
+}
+
+/**
+  Move region catalaog2 global property like 'global color=red' after each hashtag
+  like 'fk5;point( 330.6872, 42.2835)# point=cross text={3FGL J2202.7+4217} color=red'
+*/
+$catalog2->catalogContent =  split("\n",$catalog2->catalogContent);
+foreach ($catalog2->catalogContent as $key => $row)
+{
+  if ( $key == 0 )
+    $catalog2->catalogContent[$key] = "global";
+  else if(!empty($row))
+    $catalog2->catalogContent[$key] = $row."# color=yellow";
+}
+
+/*
+print_r($catalog1->catalogContent);
+print_r($catalog2->catalogContent);
+print_r("\n\n\n*******\n\n\n");
+*/
+
+
+/**
+  extract coords from region catalog 1
+*/
+$coords1 = array();
+foreach ($catalog1->catalogContent as $key => $row){
+  if($key>0)
+    $coords1[$key] = $catalog1->extractShapeParamsFromRegionString($row);
 }
 
 
-// open first catalog -> read content
-  // split on \n
-  // filter out the rows that are not regions
-
-// open second catalog -> read content
-  // split on \n
-  // filter out the rows that are not regions
-
-// split on \n
-
+/**
+  extract coords from region catalog 2
+*/
+$coords2 = array();
+foreach ($catalog2->catalogContent as $key => $row){
+  if($key>0)
+    $coords2[$key] = $catalog2->extractShapeParamsFromRegionString($row);
+}
 
 
-// create mergeCatalog
 
+/**
+Per ogni coord del catalogo 1 vado a vedere se esiste la corrispettiva coord nel
+catalogo2. In tal caso sposto la proprietà text dalla region del catalogo 1
+alla corrispettiva region del catalogo 2
+*/
+
+foreach ($coords1 as $key1 => $coord1Arr){
+  foreach ($coords2 as $key2 => $coord2Arr){
+
+    if ( count($coord1Arr) > 1 &&  count($coord2Arr) > 1 )
+    {
+
+      if ( $coord1Arr[0]==$coord2Arr[0] && $coord1Arr[1]==$coord2Arr[1])
+      {
+
+        // find & remove text label from region catalog 1
+        $pos1 = strpos($catalog1->catalogContent[$key1], "text=");
+        $catalog1->catalogContent[$key1] = str_replace("text=","",$catalog1->catalogContent[$key1]);
+
+
+        // extracting text property
+        $pos1 = strpos($catalog1->catalogContent[$key1], "{");
+        $pos2 = strpos($catalog1->catalogContent[$key1], "}");
+        $textValue = substr($catalog1->catalogContent[$key1],$pos1+1,$pos2-$pos1-1);
+
+
+        // removing text value from from region catalog 1
+        $catalog1->catalogContent[$key1] = substr($catalog1->catalogContent[$key1],0,$pos1).substr($catalog1->catalogContent[$key1],$pos2+1,strlen($catalog1->catalogContent[$key1]));
+
+
+        // add text property and value to region catalog 2
+        $catalog2->catalogContent[$key2] = $catalog2->catalogContent[$key2]." text={".$textValue."}";
+
+        
+
+      }
+    }
+  }
+}
+
+
+/**
+  Merging of the catalogs
+*/
+$mergedCatalog = "global\n";
+
+foreach ($catalog2->catalogContent as $key => $row){
+  if($key>0 && !empty($row))
+    $mergedCatalog .= $row."\n";
+}
+foreach ($catalog1->catalogContent as $key => $row){
+  if($key>0 && !empty($row))
+    $mergedCatalog .= $row."\n";
+}
+
+
+// output
+
+$n1 = split("/",$fermiCatalog1NameWithTextProperty);
+$n1 = split("\.", end($n1));
+
+
+
+$n2 = split("/",$fermiCatalog2Name);
+$n2 = split("\.",end($n2));
+
+$outfilename = "tmp/".$n1[0]."_".$n2[1]."_fermiCatalogsmerged.reg";
+
+
+
+// Write
+$mergedFile = fopen($outfilename, "w");
+if ( !$mergedFile ) {
+  responseError(500, 'File '.$outfilename.' open failed');
+}
+
+// Add content
+fwrite($mergedFile,$mergedCatalog);
+
+// Close file
+fclose($mergedFile);
+
+header('Content-Type: application/json');
+echo json_encode(array('mergedCatalogFileName' => $outfilename));
+
+/**
+DEBUG
+*/
+/*
+$myfile = fopen($outfilename, "r");
+if ( !$myfile ) {
+  responseError(500, 'File open failed: '.$outfilename);
+}
+else {
+
+  $content = fread($myfile,filesize($outfilename));
+  fclose($myfile);
+  print_r("\n\n".$content."\n\n");
+}
+*/
 
 ?>

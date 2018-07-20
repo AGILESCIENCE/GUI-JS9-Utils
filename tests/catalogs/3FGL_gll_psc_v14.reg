@@ -1,0 +1,4 @@
+global color=red
+fk5;point( 330.6872, 42.2835)# point=cross text={3FGL J2202.7+4217}
+fk5;point( 327.9032, 41.9060)# point=cross text={3FGL J2151.6+4154}
+fk5;point( 324.8972, 39.3238)# point=cross text={3FGL J2139.5+3919}

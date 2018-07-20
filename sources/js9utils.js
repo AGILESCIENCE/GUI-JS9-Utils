@@ -1,11 +1,11 @@
 
-function loadRegionCatalog(regionFileName, format, wcssys, sourceL, sourceB, degreeDistance) {
+function loadRegionCatalog($regionCatalogFilePath, format, wcssys, sourceL, sourceB, degreeDistance) {
   $.ajax({
     cache: false,
     url:'js9Utils/regionCatalogForJS9Converter.php',
     type:'get',
     data: {
-      "regionFileName" : regionFileName,
+      "$regionCatalogFilePath" : $regionCatalogFilePath,
       "format" : format,
       "wcssys" : wcssys,
       "sourceL" : sourceL,
@@ -22,7 +22,7 @@ function loadRegionCatalog(regionFileName, format, wcssys, sourceL, sourceB, deg
 
     // // DEBUG:
     //  console.log("regionFileName: ",regionFileName);
-    /*
+
     $.ajax({
     cache: false,
     type: 'GET',
@@ -36,7 +36,7 @@ function loadRegionCatalog(regionFileName, format, wcssys, sourceL, sourceB, deg
     }).fail(function(xhr, status, error) {
       console.log("ERROR!!",xhr, status, error);
     });
-    */
+    
 
   }).fail(function(errorResponse) {
 
@@ -45,23 +45,38 @@ function loadRegionCatalog(regionFileName, format, wcssys, sourceL, sourceB, deg
 }
 
 
-function mergeRegionCatalogs(catalog1Url, catalog1Format, catalog2Url, catalog2Format, outputFormat, callback) {
+function mergeRegionCatalogs(fermiCatalog1NameWithTextProperty, fermiCatalog2Name, callback) {
   $.ajax({
     cache: false,
-    url:'js9Utils/movePropertyFromRegionCatalogToRegionCatalog.php',
+    url:'js9Utils/mergeRegionCatalogs.php',
     type:'get',
     data: {
-      "catalog1Url" : catalog1Url,
-      "catalog1Format" : catalog1Format,
-      "catalog2Url" : catalog2Url,
-      "catalog2Format" : catalog2Format,
-      "outputFormat" : outputFormat
+      "fermiCatalog1NameWithTextProperty" : fermiCatalog1NameWithTextProperty,
+      "fermiCatalog2Name" : fermiCatalog2Name
     },
     contentType: "application/json; charset=utf-8",
     async: true
 
-  }).done(function(newCatalogUrl) {
-      callback(newCatalogUrl);
+  }).done(function(successResponse) {
+      console.log("successResponse: ", successResponse.mergedCatalogFileName);
+
+      // DEBUG:
+      /*
+      $.ajax({
+      cache: false,
+      type: 'GET',
+      url: "js9Utils/"+successResponse.mergedCatalogFileName,
+      contentType: "application/text; charset=utf-8",
+      headers: {
+          "X-Download":"yes",
+      }
+      }).done(function(regionFile) {
+        console.log(regionFile);
+      }).fail(function(xhr, status, error) {
+        console.log("ERROR!!",xhr, status, error);
+      });
+      */
+      callback(successResponse.mergedCatalogFileName);
   });
 }
 
